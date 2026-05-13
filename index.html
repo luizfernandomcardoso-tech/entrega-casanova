@@ -5,187 +5,171 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>App Entrega</title>
+    <title>App Entrega - Casa Nova</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             background-color: #000000;
             color: white;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
-            padding-bottom: 80px;
+            font-family: 'Inter', -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .app-header {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 10px;
-        }
-        
-        .app-header h1 {
-            font-size: 20px;
-            color: #25D366;
-            margin: 0;
-        }
-
-        .card {
+        .custom-card {
             background: #1c1c1e;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
 
-        .camera-btn {
+        .camera-zone {
             background-color: #2c2c2e;
             border: 2px dashed #48484a;
-            border-radius: 12px;
-            width: 100%;
-            height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            color: #25D366;
-            font-weight: bold;
-            position: relative;
+            transition: all 0.3s ease;
         }
 
-        .camera-input {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
+        .camera-zone:active {
+            transform: scale(0.98);
+            border-color: #25D366;
         }
 
-        #previewImg {
-            width: 100%;
-            border-radius: 8px;
+        input, select, textarea {
+            background: #2c2c2e !important;
+            border: 1px solid #3a3a3c !important;
+            color: white !important;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #25D366 !important;
+            outline: none;
+        }
+
+        #customAlert {
             display: none;
-            margin-top: 10px;
-            border: 2px solid #25D366;
-        }
-
-        label {
-            font-size: 13px;
-            color: #8e8e93;
-            margin-bottom: 4px;
-            display: block;
-            margin-top: 10px;
-        }
-
-        input, textarea {
-            width: 100%;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
             background: #2c2c2e;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            color: white;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-
-        input:focus, textarea:focus {
-            outline: 2px solid #25D366;
-        }
-
-        .btn-primary {
-            background-color: #007aff;
-            color: white;
-            font-weight: bold;
-            padding: 16px;
-            border-radius: 10px;
+            padding: 20px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 300px;
             text-align: center;
-            margin-top: 20px;
-            cursor: pointer;
+            border: 1px solid #444;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
 
-        .btn-whatsapp {
-            background-color: #25D366;
-            color: white;
-            font-weight: bold;
-            padding: 16px;
-            border-radius: 10px;
-            text-align: center;
-            margin-top: 10px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        #statusMsg {
-            text-align: center;
-            font-size: 14px;
-            margin-top: 10px;
-            color: #ffd60a;
+        #overlay {
             display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 9998;
         }
     </style>
 </head>
-<body>
+<body class="p-4 pb-24">
 
-    <div class="app-header">
-        <h1>Entregas Loja</h1>
+    <div id="overlay"></div>
+    <div id="customAlert">
+        <p id="alertText" class="mb-4 font-medium"></p>
+        <button onclick="closeAlert()" class="bg-green-500 text-white px-6 py-2 rounded-full font-bold w-full">OK</button>
     </div>
 
-    <div class="card">
-        <div class="camera-btn">
-            <span style="font-size: 30px;">📷</span>
-            <span>Tocar para tirar foto</span>
-            <input type="file" id="cameraInput" class="camera-input" accept="image/*">
+    <header class="text-center mb-6 border-b border-zinc-800 pb-4">
+        <img id="storeLogoImg" src="https://i.postimg.cc/wM9qPJ55/logo-casa-nova.png" 
+             alt="Logo Casa Nova" crossorigin="anonymous" class="h-20 mx-auto mb-2 object-contain">
+        <h1 class="text-green-500 font-bold tracking-widest text-sm">SISTEMA DE ENTREGAS</h1>
+    </header>
+
+    <div class="custom-card p-4 mb-4">
+        <div class="camera-zone relative h-32 rounded-2xl flex flex-col items-center justify-center text-green-500 font-bold overflow-hidden">
+            <span class="text-3xl mb-1">📷</span>
+            <span class="text-sm">TIRAR FOTO DO PEDIDO</span>
+            <input type="file" id="cameraInput" accept="image/*" capture="environment" 
+                   class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
         </div>
-        <p id="statusMsg">Processando imagem...</p>
-        <img id="previewImg">
-        <button onclick="location.reload()" style="background:none; border:none; color:#ff453a; margin-top:10px; width:100%; display:none;" id="btnReset">❌ Limpar / Começar do zero</button>
+        <p id="statusMsg" class="text-yellow-400 text-center text-xs mt-3 hidden italic">Processando imagem...</p>
+        <img id="previewImg" class="w-full rounded-lg mt-3 border-2 border-green-500 hidden">
+        <button id="btnReset" onclick="location.reload()" class="w-full text-red-500 text-xs mt-3 hidden font-bold">❌ LIMPAR TUDO</button>
     </div>
 
-    <div class="card">
-        <label>NOME DO CLIENTE *</label>
-        <input type="text" id="nome">
+    <div class="custom-card p-5 space-y-4">
+        <div>
+            <label class="text-[10px] text-zinc-500 font-bold block mb-1">NOME DO CLIENTE *</label>
+            <input type="text" id="nome" placeholder="Nome Completo" class="w-full p-3 rounded-xl text-base">
+        </div>
 
-        <label>QUEM RECEBE (OPCIONAL)</label>
-        <input type="text" id="recebedor">
+        <div>
+            <label class="text-[10px] text-zinc-500 font-bold block mb-1">TELEFONE DO CLIENTE *</label>
+            <input type="tel" id="telefone" placeholder="(00) 00000-0000" class="w-full p-3 rounded-xl text-base">
+        </div>
 
-        <label>RUA *</label>
-        <input type="text" id="rua">
+        <div>
+            <label class="text-[10px] text-zinc-500 font-bold block mb-1">QUEM RECEBE (OPCIONAL)</label>
+            <input type="text" id="recebedor" placeholder="Ex: Vizinho, Porteiro..." class="w-full p-3 rounded-xl text-base">
+        </div>
 
-        <div style="display:flex; gap:10px;">
-            <div style="flex:1">
-                <label>NÚMERO *</label>
-                <input type="text" id="numero">
+        <div class="grid grid-cols-3 gap-3">
+            <div class="col-span-2">
+                <label class="text-[10px] text-zinc-500 font-bold block mb-1">RUA *</label>
+                <input type="text" id="rua" class="w-full p-3 rounded-xl text-base">
             </div>
-            <div style="flex:2">
-                <label>BAIRRO *</label>
-                <input type="text" id="bairro">
+            <div>
+                <label class="text-[10px] text-zinc-500 font-bold block mb-1">Nº *</label>
+                <input type="text" id="numero" class="w-full p-3 rounded-xl text-base">
             </div>
         </div>
 
-        <label>HORÁRIO *</label>
-        <input type="text" id="horario" placeholder="Ex: Antes das 16h">
-
-        <label>OBSERVAÇÕES</label>
-        <textarea id="obs" rows="3"></textarea>
-    </div>
-
-    <div class="btn-primary" onclick="gerarEtiqueta()">
-        GERAR ETIQUETA
-    </div>
-
-    <div id="resultArea" class="card" style="display:none; margin-top:20px;">
-        <h3 style="text-align:center; margin:0 0 10px 0;">Pronto!</h3>
-        <canvas id="finalCanvas" style="width:100%; border-radius:8px;"></canvas>
-        
-        <div class="btn-whatsapp" onclick="compartilhar()">
-            📤 ENVIAR NO WHATSAPP
+        <div>
+            <label class="text-[10px] text-zinc-500 font-bold block mb-1">BAIRRO *</label>
+            <input type="text" id="bairro" class="w-full p-3 rounded-xl text-base">
         </div>
-        <p style="text-align:center; color:#666; font-size:12px; margin-top:10px;">
-            Se não abrir o WhatsApp, tire um print da tela.
-        </p>
+
+        <div>
+            <label class="text-[10px] text-zinc-500 font-bold block mb-1">FORMA DE PAGAMENTO *</label>
+            <select id="pagamento" onchange="toggleTroco()" class="w-full p-3 rounded-xl text-base">
+                <option value="PAGO">PAGO</option>
+                <option value="CREDIARIO">CREDIÁRIO</option>
+                <option value="CREDIARIO / JA ASSINOU">CREDIÁRIO / JÁ ASSINOU</option>
+                <option value="CARTÃO/LEVAR MAQUINA">CARTÃO / LEVAR MÁQUINA</option>
+                <option value="PIX PAGO">PIX PAGO</option>
+                <option value="DINHEIRO">DINHEIRO</option>
+            </select>
+        </div>
+
+        <div id="trocoContainer" class="hidden border-l-4 border-yellow-500 pl-3">
+            <label class="text-[10px] text-yellow-500 font-bold block mb-1">TROCO PARA QUANTO?</label>
+            <input type="text" id="troco" placeholder="Ex: 100,00" class="w-full p-3 rounded-xl text-base border-yellow-900">
+        </div>
+
+        <div>
+            <label class="text-[10px] text-zinc-500 font-bold block mb-1">HORÁRIO DE ENTREGA *</label>
+            <input type="text" id="horario" placeholder="Ex: URGENTE / Manhã" class="w-full p-3 rounded-xl text-base">
+        </div>
+
+        <div>
+            <label class="text-[10px] text-zinc-500 font-bold block mb-1">OBSERVAÇÕES ADICIONAIS</label>
+            <textarea id="obs" rows="2" placeholder="Cor do portão, ponto de referência..." class="w-full p-3 rounded-xl text-base"></textarea>
+        </div>
+    </div>
+
+    <button onclick="gerarEtiqueta()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-4 rounded-2xl mt-6 shadow-lg active:scale-95 transition-transform">
+        🚀 GERAR ETIQUETA FINAL
+    </button>
+
+    <div id="resultArea" class="hidden mt-8">
+        <div class="custom-card p-4">
+            <h3 class="text-center font-bold text-green-500 mb-4 uppercase tracking-widest">Etiqueta Pronta</h3>
+            <canvas id="finalCanvas" class="w-full rounded-xl shadow-2xl mb-4"></canvas>
+            
+            <button onclick="compartilhar()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold p-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform">
+                <span>📤</span> ENVIAR PARA ENTREGADOR
+            </button>
+            <p class="text-[10px] text-zinc-500 text-center mt-4 uppercase">Dica: Se o botão falhar, segure na imagem para salvar ou tire um print.</p>
+        </div>
     </div>
 
     <script>
@@ -196,14 +180,30 @@
         const ctx = canvas.getContext('2d');
         const resultArea = document.getElementById('resultArea');
         const btnReset = document.getElementById('btnReset');
+        const storeLogoImg = document.getElementById('storeLogoImg');
+        const trocoContainer = document.getElementById('trocoContainer');
 
         let imgProcessada = null;
 
-        // --- SISTEMA DE FOTO (MANTIDO IGUAL POIS FUNCIONOU) ---
+        function showAlert(msg) {
+            document.getElementById('alertText').innerText = msg;
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('customAlert').style.display = 'block';
+        }
+
+        function closeAlert() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('customAlert').style.display = 'none';
+        }
+
+        function toggleTroco() {
+            const pagto = document.getElementById('pagamento').value;
+            trocoContainer.classList.toggle('hidden', pagto !== "DINHEIRO");
+        }
+
         cameraInput.addEventListener('change', function(e) {
             if (e.target.files.length === 0) return;
-            statusMsg.style.display = 'block';
-            statusMsg.innerText = "⏳ Ajustando tamanho da foto...";
+            statusMsg.classList.remove('hidden');
             
             const file = e.target.files[0];
             const reader = new FileReader();
@@ -228,13 +228,13 @@
                     tCtx.drawImage(tempImg, 0, 0, w, h);
 
                     imgProcessada = new Image();
-                    imgProcessada.src = tCanvas.toDataURL('image/jpeg', 0.8);
+                    imgProcessada.src = tCanvas.toDataURL('image/jpeg', 0.85);
                     
                     imgProcessada.onload = function() {
                         previewImg.src = imgProcessada.src;
-                        previewImg.style.display = 'block';
-                        statusMsg.style.display = 'none';
-                        btnReset.style.display = 'block';
+                        previewImg.classList.remove('hidden');
+                        statusMsg.classList.add('hidden');
+                        btnReset.classList.remove('hidden');
                     }
                 };
                 tempImg.src = event.target.result;
@@ -242,33 +242,34 @@
             reader.readAsDataURL(file);
         });
 
-        // --- GERADOR DA ETIQUETA (FONTE AJUSTADA) ---
         function gerarEtiqueta() {
             if (!imgProcessada) {
-                alert("⚠️ É necessário tirar a foto da notinha primeiro.");
+                showAlert("⚠️ Primeiro tire a foto da notinha.");
                 return;
             }
 
-            const nome = document.getElementById('nome').value;
-            const rua = document.getElementById('rua').value;
-            const numero = document.getElementById('numero').value;
-            const bairro = document.getElementById('bairro').value;
-            const horario = document.getElementById('horario').value;
-            const recebedor = document.getElementById('recebedor').value;
-            const obs = document.getElementById('obs').value;
+            const dados = {
+                nome: document.getElementById('nome').value,
+                tel: document.getElementById('telefone').value,
+                rua: document.getElementById('rua').value,
+                num: document.getElementById('numero').value,
+                bairro: document.getElementById('bairro').value,
+                pagto: document.getElementById('pagamento').value,
+                troco: document.getElementById('troco').value,
+                hora: document.getElementById('horario').value,
+                rec: document.getElementById('recebedor').value,
+                obs: document.getElementById('obs').value
+            };
 
-            if (!nome || !rua || !numero || !bairro || !horario) {
-                alert("⚠️ Preencha os campos obrigatórios (*)");
+            if (!dados.nome || !dados.tel || !dados.rua || !dados.num || !dados.bairro || !dados.hora) {
+                showAlert("⚠️ Preencha os campos obrigatórios (*).");
                 return;
             }
 
             const largura = 800;
             const escala = largura / imgProcessada.width;
             const alturaFoto = imgProcessada.height * escala;
-            
-            // Aumentei o rodapé padrão pois as letras agora são maiores
-            let alturaRodape = 550; 
-            if (obs.length > 50) alturaRodape += 80;
+            let alturaRodape = 780; 
 
             canvas.width = largura;
             canvas.height = alturaFoto + alturaRodape;
@@ -278,104 +279,113 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(imgProcessada, 0, 0, largura, alturaFoto);
 
-            // Fundo Rodapé Preto
+            // Rodapé Design
             const yBase = alturaFoto;
             ctx.fillStyle = "#1c1c1e";
             ctx.fillRect(0, yBase, largura, alturaRodape);
 
-            // CONFIGURAÇÃO GERAL DA FONTE GRANDE
-            ctx.textAlign = "left";
-            const pad = 40;
-            let y = yBase + 70; // Margem superior interna
-
-            // Definindo a fonte padrão (Tudo 36px Negrito)
-            const fontePadrao = "bold 36px sans-serif";
-            const espacamentoLinha = 55; // Espaço entre uma linha e outra
-
-            // 1. Cliente
-            ctx.font = fontePadrao;
-            ctx.fillStyle = "white";
-            ctx.fillText("CLIENTE: " + nome.toUpperCase(), pad, y);
-            y += espacamentoLinha;
-
-            // 2. Recebedor (Agora mesmo tamanho e branco)
-            if(recebedor) {
-                ctx.font = fontePadrao;
-                ctx.fillStyle = "white"; 
-                ctx.fillText("RECEBEDOR: " + recebedor.toUpperCase(), pad, y);
-                y += espacamentoLinha;
-            }
-
-            // 3. Endereço (Mesmo tamanho)
-            ctx.font = fontePadrao;
-            ctx.fillStyle = "white";
-            
-            // Lógica para quebrar linha se o endereço for muito grande com a letra 36px
-            const enderecoTexto = `📍 ${rua}, ${numero} - ${bairro}`;
-            if(ctx.measureText(enderecoTexto).width > (largura - 60)) {
-                // Se for muito grande, quebra em duas linhas
-                 ctx.fillText(`📍 ${rua}, ${numero}`, pad, y);
-                 y += 45; // Pulo menor para a segunda linha do endereço
-                 ctx.fillText(`   ${bairro}`, pad, y);
-            } else {
-                ctx.fillText(enderecoTexto, pad, y);
-            }
-            y += espacamentoLinha + 10; // Um espacinho extra antes do horário
-
-            // 4. Horário (Mesmo tamanho, cor Verde)
-            ctx.font = fontePadrao;
+            // Barra Verde Neon
             ctx.fillStyle = "#25D366";
-            ctx.fillText("⏰ ENTREGA: " + horario, pad, y);
-            y += espacamentoLinha;
+            ctx.fillRect(0, yBase, largura, 15);
 
-            // 5. Obs (Mantive um pouco menor para caber, mas legível)
-            if(obs) {
-                ctx.fillStyle = "#dddddd";
-                ctx.font = "italic 30px sans-serif"; // Aumentei um pouco também
-                
-                // Quebra de linha simples para obs
-                const wrapWidth = largura - 80;
-                const words = ("Obs: " + obs).split(' ');
-                let line = '';
-                for(let n = 0; n < words.length; n++) {
-                    let testLine = line + words[n] + ' ';
-                    if (ctx.measureText(testLine).width > wrapWidth && n > 0) {
-                        ctx.fillText(line, pad, y);
-                        line = words[n] + ' ';
-                        y += 40;
-                    } else {
-                        line = testLine;
-                    }
-                }
-                ctx.fillText(line, pad, y);
+            ctx.textAlign = "left";
+            const pad = 50;
+            let y = yBase + 90;
+            const linha = 65;
+
+            // Renderizar Logo no Rodapé
+            try {
+                const logoW = 190;
+                const aspect = storeLogoImg.naturalHeight / storeLogoImg.naturalWidth;
+                const logoH = logoW * aspect;
+                ctx.drawImage(storeLogoImg, largura - (logoW + 40), yBase + 40, logoW, logoH);
+            } catch(e) { console.warn("Erro ao renderizar logo no canvas."); }
+
+            // Texto Cliente
+            ctx.font = "bold 38px sans-serif";
+            ctx.fillStyle = "white";
+            ctx.fillText("👤 CLIENTE: " + dados.nome.toUpperCase(), pad, y);
+            y += linha;
+
+            // Texto Telefone
+            ctx.fillStyle = "#34b7f1";
+            ctx.font = "bold 36px sans-serif";
+            ctx.fillText("📞 TEL: " + dados.tel, pad, y);
+            y += linha;
+
+            // Quem recebe
+            if(dados.rec) {
+                ctx.fillStyle = "#e5e5e5";
+                ctx.font = "32px sans-serif";
+                ctx.fillText("🤝 RECEBE: " + dados.rec.toUpperCase(), pad, y);
+                y += linha;
             }
 
-            // Linha verde decorativa
-            ctx.strokeStyle = "#25D366";
-            ctx.lineWidth = 10;
-            ctx.beginPath();
-            ctx.moveTo(0, yBase);
-            ctx.lineTo(largura, yBase);
-            ctx.stroke();
+            // Endereço
+            ctx.fillStyle = "white";
+            ctx.font = "bold 36px sans-serif";
+            const endTxt = `📍 END: ${dados.rua}, ${dados.num}`;
+            ctx.fillText(endTxt, pad, y);
+            y += 45;
+            ctx.fillText(`   BAIRRO: ${dados.bairro.toUpperCase()}`, pad, y);
+            y += linha + 15;
 
-            // Mostra
-            resultArea.style.display = "block";
+            // Pagamento (Amarelo)
+            ctx.fillStyle = "#ffd60a";
+            let pagTxt = "💳 PAGTO: " + dados.pagto;
+            if (dados.pagto === "DINHEIRO" && dados.troco) {
+                pagTxt += ` (TROCO P/ ${dados.troco})`;
+            }
+            ctx.fillText(pagTxt, pad, y);
+            y += linha;
+
+            // Horário (Verde)
+            ctx.fillStyle = "#25D366";
+            ctx.fillText("⏰ ENTREGA: " + dados.hora.toUpperCase(), pad, y);
+            y += linha + 10;
+
+            // Observações
+            if(dados.obs) {
+                ctx.fillStyle = "#8e8e93";
+                ctx.font = "italic 30px sans-serif";
+                const wrapWidth = largura - 100;
+                const words = ("OBS: " + dados.obs).split(' ');
+                let lineStr = '';
+                for(let n = 0; n < words.length; n++) {
+                    let testLine = lineStr + words[n] + ' ';
+                    if (ctx.measureText(testLine).width > wrapWidth && n > 0) {
+                        ctx.fillText(lineStr, pad, y);
+                        lineStr = words[n] + ' ';
+                        y += 38;
+                    } else { lineStr = testLine; }
+                }
+                ctx.fillText(lineStr, pad, y);
+            }
+
+            resultArea.classList.remove('hidden');
             resultArea.scrollIntoView({ behavior: 'smooth' });
         }
 
-        function compartilhar() {
-            canvas.toBlob(blob => {
-                const file = new File([blob], "entrega.jpg", { type: "image/jpeg" });
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    navigator.share({
-                        files: [file],
-                        title: 'Entrega',
-                        text: 'Detalhes da entrega'
-                    });
-                } else {
-                    alert("Segure na imagem abaixo para copiar.");
-                }
-            }, 'image/jpeg', 0.85);
+        async function compartilhar() {
+            try {
+                canvas.toBlob(async (blob) => {
+                    if (!blob) return;
+                    const file = new File([blob], "entrega_casa_nova.jpg", { type: "image/jpeg" });
+                    
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Entrega Casa Nova',
+                            text: 'Pedido pronto para entrega.'
+                        });
+                    } else {
+                        showAlert("⚠️ Seu navegador não suporta compartilhamento direto. Tire um print ou salve a imagem.");
+                    }
+                }, 'image/jpeg', 0.9);
+            } catch (err) {
+                console.error(err);
+                showAlert("⚠️ Ocorreu um erro ao compartilhar. Tente novamente.");
+            }
         }
     </script>
 </body>

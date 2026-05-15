@@ -87,7 +87,7 @@
     <div class="custom-card p-4 mb-4">
         <div class="camera-zone relative h-32 rounded-2xl flex flex-col items-center justify-center text-green-500 font-bold overflow-hidden">
             <span class="text-3xl mb-1">📷</span>
-            <span id="labelFoto" class="text-sm">TIRAR FOTO DO PEDIDO *</span>
+            <span id="labelFoto" class="text-sm">FOTO DO PEDIDO (OPCIONAL)</span>
             <input type="file" id="cameraInput" accept="image/*" capture="environment" 
                    class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
         </div>
@@ -182,17 +182,8 @@
         const btnReset = document.getElementById('btnReset');
         const storeLogoImg = document.getElementById('storeLogoImg');
         const trocoContainer = document.getElementById('trocoContainer');
-        const labelFoto = document.getElementById('labelFoto');
 
         let imgProcessada = null;
-
-        // Detecta se é celular ou computador
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        
-        // Se for PC, avisa que a foto é opcional
-        if (!isMobile) {
-            labelFoto.innerText = "FOTO DO PEDIDO (OPCIONAL NO PC)";
-        }
 
         function showAlert(msg) {
             document.getElementById('alertText').innerText = msg;
@@ -252,11 +243,7 @@
         });
 
         function gerarEtiqueta() {
-            // Exige foto apenas se for Celular. No PC passa direto.
-            if (isMobile && !imgProcessada) {
-                showAlert("⚠️ Primeiro tire a foto da notinha.");
-                return;
-            }
+            // Removida a trava da foto. Agora é opcional em qualquer dispositivo.
 
             const dados = {
                 nome: document.getElementById('nome').value,
@@ -271,6 +258,7 @@
                 obs: document.getElementById('obs').value
             };
 
+            // Mantém apenas a obrigação de preencher os textos principais
             if (!dados.nome || !dados.tel || !dados.rua || !dados.num || !dados.bairro || !dados.hora) {
                 showAlert("⚠️ Preencha os campos obrigatórios (*).");
                 return;
@@ -279,7 +267,7 @@
             const largura = 800;
             let alturaFoto = 0;
 
-            // Se tiver imagem, calcula a altura proporcional
+            // Só calcula altura se houver foto
             if (imgProcessada) {
                 const escala = largura / imgProcessada.width;
                 alturaFoto = imgProcessada.height * escala;
@@ -294,12 +282,12 @@
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Desenha a foto apenas se ela existir
+            // Só desenha a foto se ela existir
             if (imgProcessada) {
                 ctx.drawImage(imgProcessada, 0, 0, largura, alturaFoto);
             }
 
-            // Rodapé Design
+            // Início do bloco de informações (Rodapé)
             const yBase = alturaFoto;
             ctx.fillStyle = "#1c1c1e";
             ctx.fillRect(0, yBase, largura, alturaRodape);
@@ -321,19 +309,17 @@
                 ctx.drawImage(storeLogoImg, largura - (logoW + 40), yBase + 40, logoW, logoH);
             } catch(e) { console.warn("Erro ao renderizar logo no canvas."); }
 
-            // Texto Cliente
+            // Dados na Etiqueta
             ctx.font = "bold 38px sans-serif";
             ctx.fillStyle = "white";
             ctx.fillText("👤 CLIENTE: " + dados.nome.toUpperCase(), pad, y);
             y += linha;
 
-            // Texto Telefone
             ctx.fillStyle = "#34b7f1";
             ctx.font = "bold 36px sans-serif";
             ctx.fillText("📞 TEL: " + dados.tel, pad, y);
             y += linha;
 
-            // Quem recebe
             if(dados.rec) {
                 ctx.fillStyle = "#e5e5e5";
                 ctx.font = "32px sans-serif";
@@ -341,7 +327,6 @@
                 y += linha;
             }
 
-            // Endereço
             ctx.fillStyle = "white";
             ctx.font = "bold 36px sans-serif";
             const endTxt = `📍 END: ${dados.rua}, ${dados.num}`;
@@ -350,7 +335,6 @@
             ctx.fillText(`   BAIRRO: ${dados.bairro.toUpperCase()}`, pad, y);
             y += linha + 15;
 
-            // Pagamento (Amarelo)
             ctx.fillStyle = "#ffd60a";
             let pagTxt = "💳 PAGTO: " + dados.pagto;
             if (dados.pagto === "DINHEIRO" && dados.troco) {
@@ -359,12 +343,10 @@
             ctx.fillText(pagTxt, pad, y);
             y += linha;
 
-            // Horário (Verde)
             ctx.fillStyle = "#25D366";
             ctx.fillText("⏰ ENTREGA: " + dados.hora.toUpperCase(), pad, y);
             y += linha + 10;
 
-            // Observações
             if(dados.obs) {
                 ctx.fillStyle = "#8e8e93";
                 ctx.font = "italic 30px sans-serif";

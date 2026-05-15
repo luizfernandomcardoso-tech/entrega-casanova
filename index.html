@@ -87,7 +87,7 @@
     <div class="custom-card p-4 mb-4">
         <div class="camera-zone relative h-32 rounded-2xl flex flex-col items-center justify-center text-green-500 font-bold overflow-hidden">
             <span class="text-3xl mb-1">📷</span>
-            <span class="text-sm">TIRAR FOTO DO PEDIDO</span>
+            <span id="labelFoto" class="text-sm">TIRAR FOTO DO PEDIDO *</span>
             <input type="file" id="cameraInput" accept="image/*" capture="environment" 
                    class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
         </div>
@@ -182,8 +182,17 @@
         const btnReset = document.getElementById('btnReset');
         const storeLogoImg = document.getElementById('storeLogoImg');
         const trocoContainer = document.getElementById('trocoContainer');
+        const labelFoto = document.getElementById('labelFoto');
 
         let imgProcessada = null;
+
+        // Detecta se é celular ou computador
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        
+        // Se for PC, avisa que a foto é opcional
+        if (!isMobile) {
+            labelFoto.innerText = "FOTO DO PEDIDO (OPCIONAL NO PC)";
+        }
 
         function showAlert(msg) {
             document.getElementById('alertText').innerText = msg;
@@ -243,7 +252,8 @@
         });
 
         function gerarEtiqueta() {
-            if (!imgProcessada) {
+            // Exige foto apenas se for Celular. No PC passa direto.
+            if (isMobile && !imgProcessada) {
                 showAlert("⚠️ Primeiro tire a foto da notinha.");
                 return;
             }
@@ -267,17 +277,27 @@
             }
 
             const largura = 800;
-            const escala = largura / imgProcessada.width;
-            const alturaFoto = imgProcessada.height * escala;
+            let alturaFoto = 0;
+
+            // Se tiver imagem, calcula a altura proporcional
+            if (imgProcessada) {
+                const escala = largura / imgProcessada.width;
+                alturaFoto = imgProcessada.height * escala;
+            }
+
             let alturaRodape = 780; 
 
             canvas.width = largura;
             canvas.height = alturaFoto + alturaRodape;
 
-            // Fundo Branco e Foto
+            // Fundo Branco
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(imgProcessada, 0, 0, largura, alturaFoto);
+            
+            // Desenha a foto apenas se ela existir
+            if (imgProcessada) {
+                ctx.drawImage(imgProcessada, 0, 0, largura, alturaFoto);
+            }
 
             // Rodapé Design
             const yBase = alturaFoto;

@@ -91,7 +91,7 @@
             <input type="file" id="cameraInput" accept="image/*" capture="environment" 
                    class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
         </div>
-        <p id="statusMsg" class="text-yellow-400 text-center text-xs mt-3 hidden italic">Processando imagem...</p>
+        <p id="statusMsg" class="text-yellow-400 text-center text-xs mt-3 hidden italic">Otimizando para celular sem memória...</p>
         <img id="previewImg" class="w-full rounded-lg mt-3 border-2 border-green-500 hidden">
         <button id="btnReset" onclick="location.reload()" class="w-full text-red-500 text-xs mt-3 hidden font-bold">❌ LIMPAR TUDO</button>
     </div>
@@ -211,7 +211,8 @@
             reader.onload = function(event) {
                 const tempImg = new Image();
                 tempImg.onload = function() {
-                    const MAX_SIZE = 1200;
+                    // OTIMIZAÇÃO: Reduzimos o tamanho máximo para 800px para economizar RAM
+                    const MAX_SIZE = 800; 
                     let w = tempImg.width;
                     let h = tempImg.height;
 
@@ -228,7 +229,8 @@
                     tCtx.drawImage(tempImg, 0, 0, w, h);
 
                     imgProcessada = new Image();
-                    imgProcessada.src = tCanvas.toDataURL('image/jpeg', 0.85);
+                    // OTIMIZAÇÃO: Qualidade 0.6 (60%) é suficiente para leitura e muito mais leve
+                    imgProcessada.src = tCanvas.toDataURL('image/jpeg', 0.6);
                     
                     imgProcessada.onload = function() {
                         previewImg.src = imgProcessada.src;
@@ -243,8 +245,6 @@
         });
 
         function gerarEtiqueta() {
-            // Removida a trava da foto. Agora é opcional em qualquer dispositivo.
-
             const dados = {
                 nome: document.getElementById('nome').value,
                 tel: document.getElementById('telefone').value,
@@ -258,7 +258,6 @@
                 obs: document.getElementById('obs').value
             };
 
-            // Mantém apenas a obrigação de preencher os textos principais
             if (!dados.nome || !dados.tel || !dados.rua || !dados.num || !dados.bairro || !dados.hora) {
                 showAlert("⚠️ Preencha os campos obrigatórios (*).");
                 return;
@@ -267,7 +266,6 @@
             const largura = 800;
             let alturaFoto = 0;
 
-            // Só calcula altura se houver foto
             if (imgProcessada) {
                 const escala = largura / imgProcessada.width;
                 alturaFoto = imgProcessada.height * escala;
@@ -278,21 +276,17 @@
             canvas.width = largura;
             canvas.height = alturaFoto + alturaRodape;
 
-            // Fundo Branco
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Só desenha a foto se ela existir
             if (imgProcessada) {
                 ctx.drawImage(imgProcessada, 0, 0, largura, alturaFoto);
             }
 
-            // Início do bloco de informações (Rodapé)
             const yBase = alturaFoto;
             ctx.fillStyle = "#1c1c1e";
             ctx.fillRect(0, yBase, largura, alturaRodape);
 
-            // Barra Verde Neon
             ctx.fillStyle = "#25D366";
             ctx.fillRect(0, yBase, largura, 15);
 
@@ -301,15 +295,13 @@
             let y = yBase + 90;
             const linha = 65;
 
-            // Renderizar Logo no Rodapé
             try {
                 const logoW = 190;
                 const aspect = storeLogoImg.naturalHeight / storeLogoImg.naturalWidth;
                 const logoH = logoW * aspect;
                 ctx.drawImage(storeLogoImg, largura - (logoW + 40), yBase + 40, logoW, logoH);
-            } catch(e) { console.warn("Erro ao renderizar logo no canvas."); }
+            } catch(e) {}
 
-            // Dados na Etiqueta
             ctx.font = "bold 38px sans-serif";
             ctx.fillStyle = "white";
             ctx.fillText("👤 CLIENTE: " + dados.nome.toUpperCase(), pad, y);
@@ -329,8 +321,7 @@
 
             ctx.fillStyle = "white";
             ctx.font = "bold 36px sans-serif";
-            const endTxt = `📍 END: ${dados.rua}, ${dados.num}`;
-            ctx.fillText(endTxt, pad, y);
+            ctx.fillText(`📍 END: ${dados.rua}, ${dados.num}`, pad, y);
             y += 45;
             ctx.fillText(`   BAIRRO: ${dados.bairro.toUpperCase()}`, pad, y);
             y += linha + 15;
@@ -370,23 +361,23 @@
 
         async function compartilhar() {
             try {
+                // OTIMIZAÇÃO: Geramos o Blob com qualidade baixa para não ocupar espaço no cache do navegador
                 canvas.toBlob(async (blob) => {
                     if (!blob) return;
-                    const file = new File([blob], "entrega_casa_nova.jpg", { type: "image/jpeg" });
+                    const file = new File([blob], "entrega.jpg", { type: "image/jpeg" });
                     
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         await navigator.share({
                             files: [file],
                             title: 'Entrega Casa Nova',
-                            text: 'Pedido pronto para entrega.'
+                            text: 'Pedido pronto.'
                         });
                     } else {
-                        showAlert("⚠️ Seu navegador não suporta compartilhamento direto. Tire um print ou salve a imagem.");
+                        showAlert("⚠️ Memória cheia ou navegador incompatível. Tire um print da tela.");
                     }
-                }, 'image/jpeg', 0.9);
+                }, 'image/jpeg', 0.5); // Qualidade 0.5 final para o WhatsApp
             } catch (err) {
-                console.error(err);
-                showAlert("⚠️ Ocorreu um erro ao compartilhar. Tente novamente.");
+                showAlert("⚠️ Erro ao processar imagem. Tente limpar o cache do navegador.");
             }
         }
     </script>
